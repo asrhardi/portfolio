@@ -34,7 +34,7 @@ export default function App() {
     }, [theme]);
 
     const toggleTheme = useCallback(
-        () => setTheme((t) => (t === "dark" ? "light" : "dark")),
+        () => setTheme((t) => (t === "light" ? "dark" : "light")),
         []
     );
 
