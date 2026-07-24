@@ -24,7 +24,7 @@ export default function App() {
     const [curtain,    setCurtain]    = useState(null);
     const [pageKey,    setPageKey]    = useState(0);
     const [theme,      setTheme]      = useState(
-        () => (typeof document !== "undefined" && document.documentElement.dataset.theme) || "dark"
+        () => (typeof document !== "undefined" && document.documentElement.dataset.theme) || "light"
     );
     const lockedRef = useRef(false);
 
