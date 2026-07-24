@@ -1,47 +1,159 @@
 @import "tailwindcss";
 
-html, body{
+/* ── Theme tokens ─────────────────────────────────────────────
+   Dark is the default; light ("Bordeaux on Cream") is opt-in via
+   <html data-theme="light">. Toggled in App.jsx, persisted to
+   localStorage, and set pre-paint by an inline script in index.html. */
+:root,
+:root[data-theme="dark"] {
+    --bg:              #131313;
+    --surface:         #0f0f0f;
+    --btn-surface:     #1c1c1c;
+    --overlay:         rgba(13, 13, 13, 0.96);
+
+    --heading:         #ffffff;
+    --body:            #c2c6d6;
+    --muted:           #6b7280;
+    --dim:             #4b5563;
+
+    --accent:          #4d8eff;
+    --accent-2:        #adc6ff;
+    --accent-3:        #60a5fa;
+    --on-accent:       #00285d;
+    --chip-text:       #4d8eff;
+
+    --line:            rgba(255, 255, 255, 0.05);
+    --line-2:          rgba(255, 255, 255, 0.10);
+
+    --accent-weak:     rgba(77, 142, 255, 0.06);
+    --accent-soft-bg:  rgba(77, 142, 255, 0.12);
+    --accent-border:   rgba(77, 142, 255, 0.22);
+    --accent-border-2: rgba(77, 142, 255, 0.35);
+}
+
+:root[data-theme="light"] {
+    --bg:              #f5f4ef; /* bone-50  */
+    --surface:         #ece9df; /* bone-100 */
+    --btn-surface:     #ece9df;
+    --overlay:         rgba(245, 244, 239, 0.96);
+
+    --heading:         #0c0e18; /* near-black navy */
+    --body:            #333d66; /* black-700 */
+    --muted:           #7e754e; /* bone-600  */
+    --dim:             #9e9261; /* bone-500  */
+
+    --accent:          #b61639; /* bordeaux-600 */
+    --accent-2:        #88112b; /* bordeaux-700 — deeper for legible labels */
+    --accent-3:        #b61639;
+    --on-accent:       #fce8ed; /* bordeaux-50 on accent fills */
+    --chip-text:       #88112b;
+
+    --line:            rgba(12, 14, 24, 0.08);
+    --line-2:          rgba(12, 14, 24, 0.12);
+
+    --accent-weak:     rgba(182, 22, 57, 0.06);
+    --accent-soft-bg:  rgba(182, 22, 57, 0.10);
+    --accent-border:   rgba(182, 22, 57, 0.22);
+    --accent-border-2: rgba(182, 22, 57, 0.32);
+}
+
+html, body {
     margin: 0;
     padding: 0;
     font-family: "Space Grotesk", sans-serif;
-    background: #0a0a0a;
-    color: #f3f4f6;
+    background: var(--bg);
+    color: var(--body);
+    overflow: hidden;
+    transition: background-color 300ms ease, color 300ms ease;
 }
 
-@layer utilities{
+.label-text {
+    font-family: "Playfair Display", serif;
+    font-style: italic;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-size: 0.7rem;
+}
 
+/* ── Hide scrollbar but allow scroll ─────────────────────── */
+.no-scrollbar {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+
+/* ── Curtain page-turn transition ─────────────────────────── */
+@keyframes curtainIn {
+    from { transform: translateX(-100%); }
+    to   { transform: translateX(0); }
+}
+@keyframes curtainOut {
+    from { transform: translateX(0); }
+    to   { transform: translateX(100%); }
+}
+.curtain-in  { animation: curtainIn  420ms cubic-bezier(0.77, 0, 0.175, 1) forwards; }
+.curtain-out { animation: curtainOut 420ms cubic-bezier(0.77, 0, 0.175, 1) forwards; }
+
+/* ── Page content reveal after curtain lifts ──────────────── */
+@keyframes pageReveal {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+.page-content {
+    animation: pageReveal 380ms ease 180ms forwards;
+    opacity: 0;
+}
+
+/* ── Loading screen ───────────────────────────────────────── */
+@layer utilities {
     @keyframes blink {
-        0%, 100%{
-            opacity: 1;
-        }
-        50%{
-        opacity: 0;
-        }
+        0%, 100% { opacity: 1; }
+        50%       { opacity: 0; }
     }
-    .animate-blink {
-        animation : loading 0.5s ease infinite;
-    }
+    .animate-blink { animation: blink 1s ease infinite; }
 
     @keyframes loading {
-     0%{
-         transform: translateX(-100%);
-     }
-     100%{
-         transform: translateX(250%);
-     }
- }
-    .animate-loading-bar {
-        animation: loading 0.5s ease infinite;
+        0%   { transform: translateX(-100%); }
+        100% { transform: translateX(250%); }
     }
+    .animate-loading-bar { animation: loading 0.5s ease infinite; }
 }
 
-.reveal {
-    opacity: 0;
-    transform: translateY(20px);
-    transition: opacity 0.7s ease, transform 0.7s ease;
+/* ── Bottom nav arrow hover ───────────────────────────────── */
+.nav-arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-width: 40px;   /* ≥40px touch target */
+    min-height: 40px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--muted);
+    transition: color 150ms ease;
+    white-space: nowrap;
+}
+.nav-arrow:hover { color: var(--heading); }
+.nav-arrow:disabled { opacity: 0.2; cursor: default; }
+
+/* ── Keyboard focus ring (themed, keyboard-only) ──────────── */
+:where(a, button, [tabindex]):focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: 2px;
 }
 
-.reveal.visible {
-    opacity: 1;
-    transform: translateY(0);
+/* ── Respect reduced-motion preference ────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+    /* Content that reveals via animation must not stay hidden */
+    .page-content { opacity: 1 !important; }
 }

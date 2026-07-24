@@ -1,31 +1,73 @@
-export const MobileMenu = ({menuOpen, setMenuOpen}) => {
+import { useEffect } from "react";
+
+const LINKS = [
+    { id: "home",     label: "Home"       },
+    { id: "projects", label: "The Archive" },
+    { id: "about",    label: "Manifesto"   },
+    { id: "contact",  label: "Connect"     },
+];
+
+export const MobileMenu = ({ menuOpen, setMenuOpen, navigate }) => {
+    const handleNav = (id) => {
+        setMenuOpen(false);
+        navigate(id);
+    };
+
+    // Escape closes the overlay
+    useEffect(() => {
+        if (!menuOpen) return;
+        const onKey = (e) => e.key === "Escape" && setMenuOpen(false);
+        window.addEventListener("keydown", onKey);
+        return () => window.removeEventListener("keydown", onKey);
+    }, [menuOpen, setMenuOpen]);
+
     return (
-        <div className={`fixed top-0 left-0 w-full bg-[rgba(10,10,10,0.8)] z-40 flex flex-col items-center justify-center transition-all duration-300 ease-in-out 
-        ${
-            menuOpen 
-            ? "h-screen opacity-100 pointer-events-auto" 
-            : "h-0 opacity-0 pointer-events-none"
-        }
-        `}
+        <div
+            className={`fixed inset-0 bg-[var(--overlay)] backdrop-blur-md z-40 flex flex-col items-center justify-center md:hidden
+                transition-all duration-300 ease-in-out
+                ${menuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}
         >
             <button
                 onClick={() => setMenuOpen(false)}
-                className="absolute top-6 right-6 text-white text-3xl focus:outline-none cursor-pointer"
-                aria-label="Close Menu">
+                className="absolute top-6 right-6 text-[var(--heading)] text-3xl cursor-pointer"
+                aria-label="Close menu"
+            >
                 &times;
             </button>
-            <a href="#home" onClick={() => setMenuOpen(false)} className={`text-2xl font-semibold text-white my-4 transform transition-transform duration-300 ${menuOpen ? "opacity-100 translate-y-0" : "opacity-0 translate-y-5"}`}> Home
 
-            </a>
-            <a href="#about"  onClick={() => setMenuOpen(false)}className={`text-2xl font-semibold text-white my-4 transform transition-transform duration-300 ${menuOpen ? "opacity-100 translate-y-0" : "opacity-0 translate-y-5"}`}> About
+            <nav className="flex flex-col items-center gap-8">
+                {LINKS.map(({ id, label }) => (
+                    <button
+                        key={id}
+                        onClick={() => handleNav(id)}
+                        className={`text-3xl font-bold tracking-tight cursor-pointer
+                            transition-all duration-300 bg-transparent border-0
+                            ${menuOpen ? "opacity-100 translate-y-0" : "opacity-0 translate-y-5"}
+                            text-[var(--heading)] hover:text-[var(--accent)]`}
+                    >
+                        {label}
+                    </button>
+                ))}
+            </nav>
 
-            </a>
-            <a href="#projects" onClick={() => setMenuOpen(false)} className={`text-2xl font-semibold text-white my-4 transform transition-transform duration-300 ${menuOpen ? "opacity-100 translate-y-0" : "opacity-0 translate-y-5"}`}> Projects
-
-            </a>
-            <a href="#contact" onClick={() => setMenuOpen(false)} className={`text-2xl font-semibold text-white my-4 transform transition-transform duration-300 ${menuOpen ? "opacity-100 translate-y-0" : "opacity-0 translate-y-5"}`}> Contact
-
-            </a>
+            <div className="absolute bottom-10 flex gap-8">
+                <a
+                    href="https://instagram.com/asr_hardi/"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="label-text text-[var(--muted)] hover:text-[var(--heading)] transition-colors"
+                >
+                    INSTAGRAM ↗
+                </a>
+                <a
+                    href="https://github.com/asriqul"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="label-text text-[var(--muted)] hover:text-[var(--heading)] transition-colors"
+                >
+                    GITHUB ↗
+                </a>
+            </div>
         </div>
     );
 };

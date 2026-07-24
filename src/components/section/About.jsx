@@ -1,118 +1,53 @@
-import {RevealOnScroll} from "../RevealOnScroll.jsx";
+const skills = [
+    { label: "Languages", items: ["Go", "JavaScript", "TypeScript", "Python"] },
+    { label: "Backend",   items: ["Node.js", "Express", "PostgreSQL", "Docker"] },
+    { label: "Web3",      items: ["EVM", "Solana", "ethers.js"] },
+    { label: "Tooling",   items: ["Codex","Claude Code","Git", "REST API"] },
+];
 
 export const About = () => {
-
-    const programmingLang = ["JavaScript","TypeScript","Golang","SQL"]
-    const frontendTech = ["vite","reactJS","tailwindcss"]
-    const backendTech = ["nodeJS","expressJS", "mySQL", "postgreSQL" ]
-    const otherSkills = ["Github","Git","NPM", "REST API", "Figma"]
-
     return (
-        <section
-            id="about"
-            className="min-h-screen flex items-center justify-center py-20"
-        >
-        <RevealOnScroll>
-            <div className="max-w-3xl mx-auto px-4">
-                <h2 className="text-3xl font-bold mb-8 bg-gradient-to-r from-white to-blue-500 bg-clip-text text-transparent text-center">
-                    About Me
-                </h2>
-                <div className="rounded-xl p-8 border-white/10 border transition-all">
-                    <p className="text-gray-300 mb-6">
-                        A Junior Web Developer with 2+ years of experience in JavaScript, React, and Node.js, passionate about building efficient and scalable applications while continuously learning and adapting to new technologies.
-                    </p>
+        <section className="my-auto w-full flex flex-col justify-center px-6 md:px-24 lg:px-40 xl:px-64 2xl:px-80 py-12 md:py-10">
+            {/* Label */}
+            <span className="label-text text-[var(--accent-2)] block mb-5">MANIFESTO / PHILOSOPHY</span>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="rounded-xl p-6 hover:-translate-y-1 transition-all">
-                            <h3 className="text-xl font-bold mb-4">Programming</h3>
-                            <div className="flex flex-wrap gap-2">
-                                {programmingLang.map((tech, key) => (
-                                    <span key={key} className="bg-blue-500/10 text-blue-500 py-1 px-3 rounded text-sm hover:bg-blue-500/20 hover:shadow-[0_2px_rgba(59,130,246,0.2)] transition">
-                                        {tech}
+            {/* Large quote */}
+            <blockquote className="text-2xl md:text-4xl font-bold text-[var(--heading)] leading-tight tracking-tight mb-8 max-w-3xl">
+                "Building isn't just about code—it's about the{" "}
+                <span className="text-[var(--accent)]">architecture of intent.</span>"
+            </blockquote>
+
+            {/* 2-column layout */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Skills 2×2 */}
+                <div className="grid grid-cols-2 gap-3">
+                    {skills.map((group, i) => (
+                        <div key={i} className="border border-[var(--line)] p-4 bg-[var(--surface)]">
+                            <span className="label-text text-[var(--muted)] block mb-2">{`0${i + 1}.`}</span>
+                            <h3 className="text-[var(--heading)] text-sm font-semibold mb-3">{group.label}</h3>
+                            <div className="flex flex-wrap gap-1.5">
+                                {group.items.map((item, k) => (
+                                    <span key={k} className="bg-[var(--accent-soft-bg)] text-[var(--chip-text)] py-0.5 px-2 text-xs border border-[var(--accent-border)]">
+                                        {item}
                                     </span>
                                 ))}
                             </div>
                         </div>
-                        <div className="rounded-xl p-6 hover:-translate-y-1 transition-all">
-                            <h3 className="text-xl font-bold mb-4">Frontend</h3>
-                            <div className="flex flex-wrap gap-2">
-                                {frontendTech.map((tech, key) => (
-                                    <span key={key} className="bg-blue-500/10 text-blue-500 py-1 px-3 rounded text-sm hover:bg-blue-500/20 hover:shadow-[0_2px_rgba(59,130,246,0.2)] transition">
-                                        {tech}
-                                    </span>
-                                ))}
-                            </div>
-                        </div>
-                        <div className="rounded-xl p-6 hover:-translate-y-1 transition-all">
-                            <h3 className="text-xl font-bold mb-4">Backend</h3>
-                            <div className="flex flex-wrap gap-2">
-                                {backendTech.map((tech, key) => (
-                                    <span key={key} className="bg-blue-500/10 text-blue-500 py-1 px-3 rounded text-sm hover:bg-blue-500/20 hover:shadow-[0_2px_rgba(59,130,246,0.2)] transition">
-                                        {tech}
-                                    </span>
-                                ))}
-                            </div>
-                        </div>
-                        <div className="rounded-xl p-6 hover:-translate-y-1 transition-all">
-                            <h3 className="text-xl font-bold mb-4">Other Stack</h3>
-                            <div className="flex flex-wrap gap-2">
-                                {otherSkills.map((tech, key) => (
-                                    <span key={key} className="bg-blue-500/10 text-blue-500 py-1 px-3 rounded text-sm hover:bg-blue-500/20 hover:shadow-[0_2px_rgba(59,130,246,0.2)] transition">
-                                        {tech}
-                                    </span>
-                                ))}
-                            </div>
-                        </div>
-                    </div>
+                    ))}
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
-                    <div className="p-6 rounded-xl border-white/10 border  transition-all">
-                        <h3 className="text-xl font-bold mb-4">Education</h3>
-                        <ul className="list-disc list-inside text-gray-300 space-y-2">
-                            <li>
-                                <strong>B.S. in Computer Science </strong> - Pamulang University (2018-2023)
-                            </li>
-                        </ul>
-                    </div>
-                    <div className="p-6 rounded-xl border-white/10 border  transition-all">
-                        <h3 className="text-xl font-bold mb-4">Experience</h3>
-                        <div className="space-y-4 text-gray-300">
-                            <div className="font-semibold">
-                                <h4>-</h4>
-                                <p>
-                                    -
-                                </p>
-                            </div>
-                            <div className="font-semibold">
-                                <h4>-</h4>
-                                <p>
-                                    -
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                    <div className="p-6 rounded-xl border-white/10 border  transition-all">
-                        <h3 className="text-xl font-bold mb-4">Relevant Education</h3>
-                        <div className="space-y-4 text-gray-300">
-                            <div className="font-semibold">
-                                <h4>Dicoding Indonesia</h4>
-                                <ul className="list-disc list-inside space-y-2 mt-2">
-                                    <li>
-                                        Belajar dasar Pemrograman Web
-                                    </li>
-                                    <li>
-                                        Belajar dasar Pemrograman JavaScript
-                                    </li>
-                                    <li>
-                                        Belajar dasar visualisasi data
-                                    </li>
-                                </ul>
-                            </div>  
-                        </div>
-                    </div>
+
+                {/* Bio — vertically centered against the skills grid */}
+                <div className="flex flex-col justify-center">
+                    <h2 className="text-xl font-bold text-[var(--heading)] mb-2">The Archival Mindset</h2>
+                    <p className="text-[var(--body)] text-sm leading-relaxed">
+                        I build backend systems the way an archivist keeps records — deliberate,
+                        traceable, and built to last. Most of my work lives on-chain: automation
+                        agents, batch-transfer tooling, and security research where a single wrong
+                        assumption can cost real funds. I'd rather ship something that still holds up
+                        when you re-read the code a year later than something that merely works today.
+                    </p>
                 </div>
             </div>
-        </RevealOnScroll>
         </section>
-    )
-}
+    );
+};
