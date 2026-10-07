@@ -1,60 +1,70 @@
 @import "tailwindcss";
 
-/* ── Theme tokens ─────────────────────────────────────────────
-   Dark is the default; light ("Bordeaux on Cream") is opt-in via
-   <html data-theme="light">. Toggled in App.jsx, persisted to
+/* ── Vintage monochrome theme tokens ──────────────────────────
+   Light pairs aged paper with charcoal ink; dark reverses them.
+   Toggled in App.jsx, persisted to
    localStorage, and set pre-paint by an inline script in index.html. */
 :root,
 :root[data-theme="dark"] {
-    --bg:              #131313;
-    --surface:         #0f0f0f;
-    --btn-surface:     #1c1c1c;
-    --overlay:         rgba(13, 13, 13, 0.96);
+    --bg:              #1b1a18;
+    --surface:         #242320;
+    --btn-surface:     #2c2b27;
+    --overlay:         rgba(27, 26, 24, 0.97);
 
-    --heading:         #ffffff;
-    --body:            #c2c6d6;
-    --muted:           #6b7280;
-    --dim:             #4b5563;
+    --heading:         #f2efe7;
+    --body:            #d3d0c8;
+    --muted:           #aaa69e;
+    --dim:             #96928a;
 
-    --accent:          #4d8eff;
-    --accent-2:        #adc6ff;
-    --accent-3:        #60a5fa;
-    --on-accent:       #00285d;
-    --chip-text:       #4d8eff;
+    --accent:          #e3ded3;
+    --accent-2:        #d2ccc0;
+    --accent-3:        #f2efe7;
+    --on-accent:       #242320;
+    --chip-text:       #e3ded3;
 
-    --line:            rgba(255, 255, 255, 0.05);
-    --line-2:          rgba(255, 255, 255, 0.10);
+    --line:            rgba(242, 239, 231, 0.14);
+    --line-2:          rgba(242, 239, 231, 0.24);
 
-    --accent-weak:     rgba(77, 142, 255, 0.06);
-    --accent-soft-bg:  rgba(77, 142, 255, 0.12);
-    --accent-border:   rgba(77, 142, 255, 0.22);
-    --accent-border-2: rgba(77, 142, 255, 0.35);
+    --accent-weak:     rgba(227, 222, 211, 0.04);
+    --accent-soft-bg:  rgba(227, 222, 211, 0.08);
+    --accent-border:   rgba(227, 222, 211, 0.22);
+    --accent-border-2: rgba(227, 222, 211, 0.40);
+
+    --paper-grain:     rgba(242, 239, 231, 0.018);
+    --print-bg:        #262521;
+    --print-mid:       #34322d;
+    --print-edge:      #46433d;
+    --print-ink:       #eee9dd;
+    --curtain:         linear-gradient(105deg, #151412, #242320 55%, #36342f);
 }
 
 :root[data-theme="light"] {
-    --bg:              #f5f4ef; /* bone-50  */
-    --surface:         #ece9df; /* bone-100 */
-    --btn-surface:     #ece9df;
-    --overlay:         rgba(245, 244, 239, 0.96);
+    --bg:              #f2efe7;
+    --surface:         #e8e4da;
+    --btn-surface:     #e8e4da;
+    --overlay:         rgba(242, 239, 231, 0.97);
 
-    --heading:         #0c0e18; /* near-black navy */
-    --body:            #333d66; /* black-700 */
-    --muted:           #7e754e; /* bone-600  */
-    --dim:             #9e9261; /* bone-500  */
+    --heading:         #242320;
+    --body:            #484640;
+    --muted:           #68645d;
+    --dim:             #746f66;
 
-    --accent:          #b61639; /* bordeaux-600 */
-    --accent-2:        #88112b; /* bordeaux-700 — deeper for legible labels */
-    --accent-3:        #b61639;
-    --on-accent:       #fce8ed; /* bordeaux-50 on accent fills */
-    --chip-text:       #88112b;
+    --accent:          #34322d;
+    --accent-2:        #4c4841;
+    --accent-3:        #242320;
+    --on-accent:       #f2efe7;
+    --chip-text:       #48443d;
 
-    --line:            rgba(12, 14, 24, 0.08);
-    --line-2:          rgba(12, 14, 24, 0.12);
+    --line:            rgba(36, 35, 32, 0.15);
+    --line-2:          rgba(36, 35, 32, 0.25);
 
-    --accent-weak:     rgba(182, 22, 57, 0.06);
-    --accent-soft-bg:  rgba(182, 22, 57, 0.10);
-    --accent-border:   rgba(182, 22, 57, 0.22);
-    --accent-border-2: rgba(182, 22, 57, 0.32);
+    --accent-weak:     rgba(52, 50, 45, 0.04);
+    --accent-soft-bg:  rgba(52, 50, 45, 0.06);
+    --accent-border:   rgba(52, 50, 45, 0.22);
+    --accent-border-2: rgba(52, 50, 45, 0.40);
+
+    --paper-grain:     rgba(36, 35, 32, 0.025);
+    --curtain:         linear-gradient(105deg, #d6d0c4, #e8e4da 55%, #f2efe7);
 }
 
 html, body {
@@ -65,6 +75,37 @@ html, body {
     color: var(--body);
     overflow: hidden;
     transition: background-color 300ms ease, color 300ms ease;
+}
+
+/* Subtle printed-paper finish, kept beneath the content. */
+.paper-surface {
+    background-image: repeating-linear-gradient(
+        0deg,
+        var(--paper-grain) 0,
+        var(--paper-grain) 1px,
+        transparent 1px,
+        transparent 4px
+    );
+}
+
+.archive-print {
+    background: linear-gradient(135deg, var(--print-bg), var(--print-mid) 55%, var(--print-edge));
+}
+
+.archive-print-muted {
+    background: linear-gradient(135deg, var(--print-bg), var(--print-mid));
+}
+
+.print-grid {
+    background-image:
+        linear-gradient(var(--print-ink) 1px, transparent 1px),
+        linear-gradient(90deg, var(--print-ink) 1px, transparent 1px);
+    background-size: 32px 32px;
+}
+
+::selection {
+    background: var(--accent);
+    color: var(--on-accent);
 }
 
 .label-text {

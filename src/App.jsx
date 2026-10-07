@@ -80,7 +80,7 @@ export default function App() {
 
                 {/* ── Main content viewport ───────────────── */}
                 {/* Full width, above bottom nav bar */}
-                <div className="fixed top-0 left-0 right-0 bottom-14 overflow-y-auto no-scrollbar bg-[var(--bg)] transition-colors">
+                <div className="paper-surface fixed top-0 left-0 right-0 bottom-14 overflow-y-auto no-scrollbar bg-[var(--bg)] transition-colors">
                     <div key={pageKey} className="page-content min-h-full flex flex-col">
                         {activePage === "home"     && <Home     onNavigate={navigate} />}
                         {activePage === "projects" && <Project  />}
@@ -93,7 +93,7 @@ export default function App() {
                 {/* Full-width primary navigation */}
                 <div className="fixed bottom-0 left-0 right-0 h-14 z-30
                     flex items-center justify-between px-6 md:px-10
-                    bg-[var(--bg)] border-t border-[var(--line)] transition-colors">
+                    paper-surface bg-[var(--bg)] border-t border-[var(--line)] transition-colors">
 
                     {/* Brand → home */}
                     <button
@@ -113,8 +113,8 @@ export default function App() {
                                 <button
                                     key={p.id}
                                     onClick={() => navigate(i)}
-                                    className={`px-4 py-2 text-sm tracking-[-0.3px] transition-colors cursor-pointer
-                                        ${isActive ? "text-[var(--accent-3)]" : "text-[var(--muted)] hover:text-[var(--heading)]"}`}
+                                    className={`px-2 lg:px-4 py-2 text-sm tracking-[-0.3px] transition-colors cursor-pointer
+                                        ${isActive ? "text-[var(--accent-3)] underline underline-offset-4 decoration-[var(--line-2)]" : "text-[var(--muted)] hover:text-[var(--heading)]"}`}
                                 >
                                     {p.label}
                                 </button>
@@ -158,7 +158,7 @@ export default function App() {
                 {curtain && (
                     <div
                         className={`fixed inset-0 z-50 ${curtain === "in" ? "curtain-in" : "curtain-out"}`}
-                        style={{ background: "linear-gradient(105deg,#060610 0%,#0d0d1a 40%,#131320 100%)" }}
+                        style={{ background: "var(--curtain)" }}
                     />
                 )}
             </div>

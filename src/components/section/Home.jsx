@@ -51,7 +51,7 @@ export const Home = ({ onNavigate }) => {
                     <img
                         src="/profile.jpg"
                         alt="Profile avatar of a black cat wearing sunglasses"
-                        className="w-48 h-48 md:w-[120%] md:h-auto md:aspect-square max-w-80 rounded-full object-cover border-2 border-[var(--accent)]"
+                        className="w-48 h-48 md:w-[120%] md:h-auto md:aspect-square max-w-80 rounded-full object-cover grayscale contrast-[0.95] border-2 border-[var(--accent)]"
                     />
                 </div>
             </div>
@@ -59,24 +59,17 @@ export const Home = ({ onNavigate }) => {
             {/* Bento preview grid */}
             <div className="grid grid-cols-12 gap-4 md:h-56">
                 {/* Large visual — self-contained CSS art. Stays a dark framed print in both themes. */}
-                <div className="group col-span-12 md:col-span-8 h-44 md:h-auto relative overflow-hidden bg-linear-to-br from-[#1a1a2e] via-[#16213e] to-[#0f3460]">
+                <div className="archive-print group col-span-12 md:col-span-8 h-44 md:h-auto relative overflow-hidden">
                     {/* Fine grid overlay */}
-                    <div
-                        className="absolute inset-0 opacity-[0.15]"
-                        style={{
-                            backgroundImage:
-                                "linear-gradient(#4d8eff 1px, transparent 1px), linear-gradient(90deg, #4d8eff 1px, transparent 1px)",
-                            backgroundSize: "32px 32px",
-                        }}
-                    />
+                    <div className="print-grid absolute inset-0 opacity-[0.08]" />
                     {/* Concentric circle motif (echoes the Archive cards) */}
                     <div className="absolute inset-0 flex items-center justify-center opacity-25">
-                        <div className="w-44 h-44 rounded-full border border-[#4d8eff] transition-transform duration-700 group-hover:scale-110" />
-                        <div className="absolute w-28 h-28 rounded-full border border-white/40 transition-transform duration-700 group-hover:scale-90" />
+                        <div className="w-44 h-44 rounded-full border border-[var(--print-ink)] transition-transform duration-700 group-hover:scale-110" />
+                        <div className="absolute w-28 h-28 rounded-full border border-[var(--print-ink)]/60 transition-transform duration-700 group-hover:scale-90" />
                     </div>
                     {/* Captions */}
-                    <span className="absolute top-3 right-4 label-text text-white/40">∞</span>
-                    <span className="absolute bottom-3 left-4 label-text text-white/50 border border-white/20 px-2 py-0.5">
+                    <span className="absolute top-3 right-4 label-text text-[var(--print-ink)]/65">∞</span>
+                    <span className="absolute bottom-3 left-4 label-text text-[var(--print-ink)]/80 border border-[var(--print-ink)]/30 px-2 py-0.5">
                         NOW · WEB3 SECURITY
                     </span>
                 </div>
@@ -87,9 +80,9 @@ export const Home = ({ onNavigate }) => {
                         <span className="label-text text-[var(--on-accent)]">FOCUS.01</span>
                         <h3 className="text-[var(--on-accent)] text-xl md:text-2xl font-normal leading-tight">DeFi Automation</h3>
                     </div>
-                    <div className="bg-[#2a2a2a] flex flex-col justify-between p-5 md:p-6 h-28 md:h-auto transition-transform duration-300 hover:-translate-y-1">
-                        <span className="label-text text-[#adc6ff]">FOCUS.02</span>
-                        <h3 className="text-white text-xl md:text-2xl font-normal leading-tight">Security Research</h3>
+                    <div className="bg-[var(--surface)] border border-[var(--line-2)] flex flex-col justify-between p-5 md:p-6 h-28 md:h-auto transition-transform duration-300 hover:-translate-y-1">
+                        <span className="label-text text-[var(--muted)]">FOCUS.02</span>
+                        <h3 className="text-[var(--heading)] text-xl md:text-2xl font-normal leading-tight">Security Research</h3>
                     </div>
                 </div>
             </div>

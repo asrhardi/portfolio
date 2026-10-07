@@ -53,13 +53,13 @@ export const Project = () => {
                         {/* Image strip — dark "framed print" thumbnail in both themes */}
                         <div className={`relative h-36 overflow-hidden ${
                             project.accent
-                                ? "bg-linear-to-br from-[#1a1a2e] via-[#16213e] to-[#0f3460]"
-                                : "bg-linear-to-br from-[#0d0d0d] via-[#1a1a1a] to-[#2a2a2a]"
+                                ? "archive-print"
+                                : "archive-print-muted"
                         }`}>
                             <div className="absolute inset-0 flex items-center justify-center opacity-15">
-                                <div className={`w-32 h-32 rounded-full border ${project.accent ? "border-[#4d8eff]" : "border-white"}`} />
+                                <div className="w-32 h-32 rounded-full border border-[var(--print-ink)]" />
                             </div>
-                            <span className="absolute bottom-3 left-4 label-text text-white/50 border border-white/20 px-2 py-0.5">
+                            <span className="absolute bottom-3 left-4 label-text text-[var(--print-ink)]/80 border border-[var(--print-ink)]/30 px-2 py-0.5">
                                 {project.tag}
                             </span>
                         </div>
