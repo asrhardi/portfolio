@@ -1,102 +1,49 @@
-const projects = [
-    {
-        title: "Polymarket Agent",
-        type: "Personal Project · 2026",
-        description: "Automated agent for Polymarket prediction markets — Go backend with a clean cmd/internal architecture and Docker deployment.",
-        tag: "DeFi Automation",
-        tech: ["Go", "Docker"],
-        href: "https://github.com/asrhardi/polymarket-agent",
-        accent: true,
-    },
-    {
-        title: "CUDA Mnemonic Solver",
-        type: "Security Research · 2026",
-        description: "GPU-accelerated Solana mnemonic recovery — CUDA C++ kernels driven by Python for parallel key-space search (educational).",
-        tag: "Web3 Security",
-        tech: ["Python", "CUDA", "Solana"],
-        href: "https://github.com/asrhardi/Brute-force-CUDA-Solver",
-        accent: false,
-    },
-    {
-        title: "ERC-20 Batch Transfer",
-        type: "Personal Project · 2025",
-        description: "Batch transfers of ERC-20 tokens on Tea Sepolia — Node.js automation for many-recipient payouts.",
-        tag: "Backend Engineering",
-        tech: ["Node.js"],
-        href: "https://github.com/asrhardi/Tea-batch-transfer",
-        accent: false,
-    },
-];
+import { projects, securityContributions } from "../../data/projects.js";
 
-const features = [
-    { label: "On-Chain Automation", desc: "Trading agents, batch transfers, and bots that sign and send transactions." },
-    { label: "Security & Recovery", desc: "GPU key-space search, wallet mnemonic recovery, and web3 bug hunting."      },
-    { label: "Backend Engineering", desc: "Go & Node.js services with clean architecture and Docker deploys."          },
-];
+const ArchiveEntry = ({ entry, index }) => (
+    <li className="project-entry">
+        <span className="project-number" aria-hidden="true">0{index + 1}</span>
+        <article>
+            <div className="project-meta"><span>{entry.tag}</span><span>{entry.type} / {entry.year}</span></div>
+            <h3><a href={entry.href} target="_blank" rel="noreferrer">{entry.title}<span className="sr-only"> (opens in a new tab)</span><span aria-hidden="true">↗</span></a></h3>
+            <p>{entry.description}</p>
+            {entry.credit && (
+                <dl className="contribution-details">
+                    {/* <div><dt>Verdict</dt><dd>{entry.status}</dd></div> */}
+                    <div><dt>Credited as</dt><dd>{entry.credit}</dd></div>
+                    <div><dt>Release</dt><dd>{entry.version}</dd></div>
+                </dl>
+            )}
+            {entry.tech && (
+                <ul className="tech-list" aria-label={`${entry.title} technologies`}>
+                    {entry.tech.map((technology) => <li key={technology}>{technology}</li>)}
+                </ul>
+            )}
+        </article>
+    </li>
+);
 
-export const Project = () => {
-    return (
-        <section className="my-auto w-full flex flex-col justify-center px-6 md:px-24 lg:px-40 xl:px-64 2xl:px-80 py-12 md:py-10">
-            {/* Header */}
-            <div className="flex items-end justify-between mb-6">
-                <div>
-                    <span className="label-text text-[var(--accent-2)] block mb-2">PORTFOLIO / WORK</span>
-                    <h2 className="text-4xl md:text-5xl font-bold text-[var(--heading)] tracking-tight">The Archive</h2>
-                </div>
-                <span className="label-text text-[var(--muted)] hidden md:block">SELECTED PROJECTS</span>
-            </div>
+export const Project = () => (
+    <section className="page-shell archive-page" aria-labelledby="archive-title">
+        <header className="section-header">
+            <p className="label-text">Selected work / 2025–2026</p>
+            <h1 id="archive-title" className="page-title">The <em>Archive.</em></h1>
+            <p className="section-description">Publicly credited security research, automation tools, and backend experiments, with links to the original work.</p>
+        </header>
 
-            {/* Project cards — 3-up on desktop, aligns with the feature row below */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
-                {projects.map((project, i) => (
-                    <div key={i} className="border border-[var(--line)] hover:border-[var(--accent-border-2)] transition-colors duration-200 bg-[var(--surface)] flex flex-col">
-                        {/* Image strip — dark "framed print" thumbnail in both themes */}
-                        <div className={`relative h-36 overflow-hidden ${
-                            project.accent
-                                ? "archive-print"
-                                : "archive-print-muted"
-                        }`}>
-                            <div className="absolute inset-0 flex items-center justify-center opacity-15">
-                                <div className="w-32 h-32 rounded-full border border-[var(--print-ink)]" />
-                            </div>
-                            <span className="absolute bottom-3 left-4 label-text text-[var(--print-ink)]/80 border border-[var(--print-ink)]/30 px-2 py-0.5">
-                                {project.tag}
-                            </span>
-                        </div>
-
-                        {/* Content */}
-                        <div className="p-5 flex flex-col gap-2 flex-1">
-                            <span className="label-text text-[var(--muted)]">{project.type}</span>
-                            <h3 className="text-base font-bold text-[var(--heading)] leading-snug">{project.title}</h3>
-                            <p className="text-[var(--muted)] text-sm leading-relaxed flex-1">{project.description}</p>
-                            <div className="flex items-center justify-between mt-1">
-                                <div className="flex flex-wrap gap-1.5">
-                                    {project.tech.map((t, k) => (
-                                        <span key={k} className="bg-[var(--accent-soft-bg)] text-[var(--chip-text)] py-0.5 px-2 text-xs border border-[var(--accent-border)]">
-                                            {t}
-                                        </span>
-                                    ))}
-                                </div>
-                                <a href={project.href} target="_blank" rel="noreferrer"
-                                    className="label-text text-[var(--accent-2)] hover:text-[var(--heading)] transition-colors shrink-0 ml-3">
-                                    VIEW →
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                ))}
-            </div>
-
-            {/* Feature highlights row */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                {features.map((f, i) => (
-                    <div key={i} className="border border-[var(--line)] p-4 bg-[var(--surface)]">
-                        <h4 className="text-[var(--heading)] text-sm font-semibold mb-1">{f.label}</h4>
-                        <p className="text-[var(--muted)] text-xs leading-relaxed">{f.desc}</p>
-                        <span className="text-[var(--accent)] text-base mt-2 block">→</span>
-                    </div>
-                ))}
-            </div>
+        <section className="archive-group" aria-labelledby="security-contributions-title">
+            <h2 className="archive-group-title" id="security-contributions-title">Security contributions</h2>
+            <ol className="project-list">
+                {securityContributions.map((entry, index) => <ArchiveEntry key={entry.href} entry={entry} index={index} />)}
+            </ol>
         </section>
-    );
-};
+
+        <section className="archive-group" aria-labelledby="projects-title">
+            <h2 className="archive-group-title" id="projects-title">Projects & experiments</h2>
+            <ol className="project-list">
+                {projects.map((entry, index) => <ArchiveEntry key={entry.href} entry={entry} index={index} />)}
+            </ol>
+        </section>
+        <p className="archive-footnote">Contribution links point to public release credits; project links point to source repositories.</p>
+    </section>
+);

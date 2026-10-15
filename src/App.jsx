@@ -1,167 +1,127 @@
-import "./index.css"
+import "./index.css";
 import { useState, useCallback, useRef, useEffect } from "react";
 import { FiSun, FiMoon } from "react-icons/fi";
-import { LoadingScreen } from "./components/LoadingScreen.jsx";
-import { MobileMenu }    from "./components/MobileMenu.jsx";
-import { Home }          from "./components/section/Home.jsx";
-import { About }         from "./components/section/About.jsx";
-import { Project }       from "./components/section/Project.jsx";
-import { Contact }       from "./components/section/Contact.jsx";
+import { MobileMenu } from "./components/MobileMenu.jsx";
+import { Home } from "./components/section/Home.jsx";
+import { About } from "./components/section/About.jsx";
+import { Project } from "./components/section/Project.jsx";
+import { Contact } from "./components/section/Contact.jsx";
 
 const PAGES = [
-    { id: "home",     label: "Home"       },
+    { id: "home", label: "Home" },
     { id: "projects", label: "The Archive" },
-    { id: "about",    label: "Manifesto"   },
-    { id: "contact",  label: "Connect"     },
+    { id: "about", label: "Manifesto" },
+    { id: "contact", label: "Connect" },
 ];
 
-const CURTAIN_MS = 420;
+function getPageIndex() {
+    const index = PAGES.findIndex((page) => page.id === window.location.hash.slice(1));
+    return index < 0 ? 0 : index;
+}
 
 export default function App() {
-    const [isLoaded,   setIsLoaded]   = useState(false);
-    const [menuOpen,   setMenuOpen]   = useState(false);
-    const [pageIndex,  setPageIndex]  = useState(0);
-    const [curtain,    setCurtain]    = useState(null);
-    const [pageKey,    setPageKey]    = useState(0);
-    const [theme,      setTheme]      = useState(
-        () => (typeof document !== "undefined" && document.documentElement.dataset.theme) || "light"
+    const [menuOpen, setMenuOpen] = useState(false);
+    const [pageIndex, setPageIndex] = useState(getPageIndex);
+    const [theme, setTheme] = useState(
+        () => document.documentElement.dataset.theme === "dark" ? "dark" : "light"
     );
-    const lockedRef = useRef(false);
+    const mainRef = useRef(null);
+    const menuButtonRef = useRef(null);
+    const activePage = PAGES[pageIndex];
 
     useEffect(() => {
         document.documentElement.dataset.theme = theme;
-        try { localStorage.setItem("theme", theme); } catch { /* ignore */ }
+        try { localStorage.setItem("theme", theme); } catch { /* Storage may be unavailable. */ }
     }, [theme]);
 
-    const toggleTheme = useCallback(
-        () => setTheme((t) => (t === "light" ? "dark" : "light")),
-        []
-    );
+    useEffect(() => {
+        const handleHashChange = () => {
+            setPageIndex(getPageIndex());
+            setMenuOpen(false);
+            mainRef.current?.scrollTo(0, 0);
+            mainRef.current?.focus({ preventScroll: true });
+        };
+        window.addEventListener("hashchange", handleHashChange);
+        return () => window.removeEventListener("hashchange", handleHashChange);
+    }, []);
+
+    useEffect(() => {
+        document.title = `${activePage.label} | Ace ft Nemo`;
+    }, [activePage.label]);
 
     const navigate = useCallback((target) => {
-        const nextIdx = typeof target === "number"
-            ? target
-            : PAGES.findIndex((p) => p.id === target);
-
-        if (nextIdx === pageIndex || nextIdx < 0 || lockedRef.current) return;
-        lockedRef.current = true;
+        const page = typeof target === "number" ? PAGES[target] : PAGES.find((item) => item.id === target);
+        if (!page) return;
         setMenuOpen(false);
-
-        setCurtain("in");
-        setTimeout(() => {
-            setPageIndex(nextIdx);
-            setPageKey((k) => k + 1);
-            setCurtain("out");
-        }, CURTAIN_MS);
-        setTimeout(() => {
-            setCurtain(null);
-            lockedRef.current = false;
-        }, CURTAIN_MS * 2);
-    }, [pageIndex]);
-
-    const activePage = PAGES[pageIndex].id;
-    const hasPrev    = pageIndex > 0;
-    const hasNext    = pageIndex < PAGES.length - 1;
+        window.location.hash = page.id;
+    }, []);
 
     return (
         <>
-            {!isLoaded && <LoadingScreen onComplete={() => setIsLoaded(true)} />}
+            <a className="skip-link" href="#main-content" onClick={(event) => {
+                event.preventDefault();
+                mainRef.current?.focus();
+            }}>
+                Skip to content
+            </a>
 
-            <div className={`transition-opacity duration-700 ${isLoaded ? "opacity-100" : "opacity-0"}`}>
-                {/* ── Mobile menu + hamburger ──────────────── */}
-                <MobileMenu menuOpen={menuOpen} setMenuOpen={setMenuOpen} navigate={navigate} />
-                <button
-                    className="fixed top-5 right-5 z-50 md:hidden inline-flex items-center justify-center h-10 w-10 text-[var(--heading)] text-xl bg-[var(--btn-surface)] rounded-lg border border-[var(--line-2)] transition-colors"
-                    onClick={() => setMenuOpen((p) => !p)}
-                    aria-label="Open menu"
-                >
-                    &#9776;
-                </button>
-
-                {/* ── Main content viewport ───────────────── */}
-                {/* Full width, above bottom nav bar */}
-                <div className="paper-surface fixed top-0 left-0 right-0 bottom-14 overflow-y-auto no-scrollbar bg-[var(--bg)] transition-colors">
-                    <div key={pageKey} className="page-content min-h-full flex flex-col">
-                        {activePage === "home"     && <Home     onNavigate={navigate} />}
-                        {activePage === "projects" && <Project  />}
-                        {activePage === "about"    && <About    />}
-                        {activePage === "contact"  && <Contact  />}
-                    </div>
+            <main id="main-content" ref={mainRef} tabIndex={-1} className="content-viewport paper-surface" aria-label={activePage.label}>
+                <div className="page-content" key={activePage.id}>
+                    {activePage.id === "home" && <Home onNavigate={navigate} />}
+                    {activePage.id === "projects" && <Project />}
+                    {activePage.id === "about" && <About />}
+                    {activePage.id === "contact" && <Contact />}
                 </div>
+            </main>
 
-                {/* ── Bottom nav bar ──────────────────────── */}
-                {/* Full-width primary navigation */}
-                <div className="fixed bottom-0 left-0 right-0 h-14 z-30
-                    flex items-center justify-between px-6 md:px-10
-                    paper-surface bg-[var(--bg)] border-t border-[var(--line)] transition-colors">
+            <footer className="bottom-bar paper-surface">
+                <a href="#home" className="brand-link" aria-label="Ace ft Nemo, home">Ace ft <em>Nemo</em></a>
 
-                    {/* Brand → home */}
+                <nav className="desktop-nav" aria-label="Main navigation">
+                    {PAGES.map((page) => (
+                        <a key={page.id} href={`#${page.id}`} aria-current={activePage.id === page.id ? "page" : undefined}>
+                            {page.label}
+                        </a>
+                    ))}
+                </nav>
+
+                <div className="nav-controls">
                     <button
-                        onClick={() => navigate("home")}
-                        className="text-[var(--heading)] text-sm font-bold tracking-[-0.4px] hover:text-[var(--accent-2)] transition-colors cursor-pointer shrink-0"
-                        aria-label="Back to index"
+                        ref={menuButtonRef}
+                        className="menu-trigger"
+                        onClick={() => setMenuOpen(true)}
+                        aria-haspopup="dialog"
+                        aria-expanded={menuOpen}
+                        aria-controls="mobile-menu"
                     >
-                        Ace ft 
-                        <span className="font-bold leading-none tracking-[0px] text-[clamp(90px)] text-[var(--accent)] "> Nemo </span>
+                        Menu
                     </button>
-
-                    {/* Direct page links (desktop) */}
-                    <nav className="hidden md:flex items-center gap-1 absolute left-1/2 -translate-x-1/2">
-                        {PAGES.map((p, i) => {
-                            const isActive = i === pageIndex;
-                            return (
-                                <button
-                                    key={p.id}
-                                    onClick={() => navigate(i)}
-                                    className={`px-2 lg:px-4 py-2 text-sm tracking-[-0.3px] transition-colors cursor-pointer
-                                        ${isActive ? "text-[var(--accent-3)] underline underline-offset-4 decoration-[var(--line-2)]" : "text-[var(--muted)] hover:text-[var(--heading)]"}`}
-                                >
-                                    {p.label}
-                                </button>
-                            );
-                        })}
-                    </nav>
-
-                    {/* Theme toggle + page counter + prev/next */}
-                    <div className="flex items-center gap-4 md:gap-5 shrink-0">
-                        <button
-                            onClick={toggleTheme}
-                            className="text-[var(--muted)] hover:text-[var(--heading)] transition-colors cursor-pointer inline-flex items-center justify-center h-10 w-10 -mr-1"
-                            aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
-                            title={theme === "dark" ? "Light mode" : "Dark mode"}
-                        >
-                            {theme === "dark" ? <FiSun size={16} /> : <FiMoon size={16} />}
-                        </button>
-                        <span className="label-text text-[var(--dim)] hidden sm:inline">
-                            {String(pageIndex + 1).padStart(2, "0")}&nbsp;/&nbsp;{String(PAGES.length).padStart(2, "0")}
-                        </span>
-                        <button
-                            className="nav-arrow"
-                            onClick={() => hasPrev && navigate(pageIndex - 1)}
-                            disabled={!hasPrev}
-                            aria-label="Previous page"
-                        >
-                            <span className="text-lg">←</span>
-                        </button>
-                        <button
-                            className="nav-arrow"
-                            onClick={() => hasNext && navigate(pageIndex + 1)}
-                            disabled={!hasNext}
-                            aria-label="Next page"
-                        >
-                            <span className="text-lg">→</span>
-                        </button>
+                    <button
+                        className="icon-button"
+                        onClick={() => setTheme((value) => value === "light" ? "dark" : "light")}
+                        aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+                        title={theme === "dark" ? "Light mode" : "Dark mode"}
+                    >
+                        {theme === "dark" ? <FiSun size={18} aria-hidden="true" /> : <FiMoon size={18} aria-hidden="true" />}
+                    </button>
+                    <span className="page-counter" aria-label={`Page ${pageIndex + 1} of ${PAGES.length}`}>
+                        {String(pageIndex + 1).padStart(2, "0")} / {String(PAGES.length).padStart(2, "0")}
+                    </span>
+                    <div className="page-arrows">
+                        <button className="icon-button" onClick={() => navigate(pageIndex - 1)} disabled={pageIndex === 0} aria-label="Previous page">←</button>
+                        <button className="icon-button" onClick={() => navigate(pageIndex + 1)} disabled={pageIndex === PAGES.length - 1} aria-label="Next page">→</button>
                     </div>
                 </div>
+            </footer>
 
-                {/* ── Curtain overlay ──────────────────────── */}
-                {curtain && (
-                    <div
-                        className={`fixed inset-0 z-50 ${curtain === "in" ? "curtain-in" : "curtain-out"}`}
-                        style={{ background: "var(--curtain)" }}
-                    />
-                )}
-            </div>
+            <MobileMenu
+                pages={PAGES}
+                activePage={activePage.id}
+                menuOpen={menuOpen}
+                onClose={() => setMenuOpen(false)}
+                triggerRef={menuButtonRef}
+                navigate={navigate}
+            />
         </>
     );
 }

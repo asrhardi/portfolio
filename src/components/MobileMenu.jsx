@@ -1,73 +1,69 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
-const LINKS = [
-    { id: "home",     label: "Home"       },
-    { id: "projects", label: "The Archive" },
-    { id: "about",    label: "Manifesto"   },
-    { id: "contact",  label: "Connect"     },
-];
+export const MobileMenu = ({ pages, activePage, menuOpen, onClose, triggerRef, navigate }) => {
+    const dialogRef = useRef(null);
 
-export const MobileMenu = ({ menuOpen, setMenuOpen, navigate }) => {
-    const handleNav = (id) => {
-        setMenuOpen(false);
-        navigate(id);
-    };
-
-    // Escape closes the overlay
     useEffect(() => {
-        if (!menuOpen) return;
-        const onKey = (e) => e.key === "Escape" && setMenuOpen(false);
-        window.addEventListener("keydown", onKey);
-        return () => window.removeEventListener("keydown", onKey);
-    }, [menuOpen, setMenuOpen]);
+        const dialog = dialogRef.current;
+        if (menuOpen && !dialog.open) dialog.showModal();
+        if (!menuOpen && dialog.open) {
+            dialog.close();
+            triggerRef.current?.focus();
+        }
+    }, [menuOpen, triggerRef]);
+
+    useEffect(() => {
+        const media = window.matchMedia("(min-width: 960px)");
+        const closeOnDesktop = () => {
+            if (media.matches && dialogRef.current.open) dialogRef.current.close();
+        };
+        media.addEventListener("change", closeOnDesktop);
+        return () => media.removeEventListener("change", closeOnDesktop);
+    }, []);
 
     return (
-        <div
-            className={`fixed inset-0 bg-[var(--overlay)] backdrop-blur-md z-40 flex flex-col items-center justify-center md:hidden
-                transition-all duration-300 ease-in-out
-                ${menuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}
+        <dialog
+            id="mobile-menu"
+            ref={dialogRef}
+            className="mobile-menu paper-surface"
+            aria-labelledby="menu-title"
+            onClose={onClose}
+            onCancel={onClose}
+            onKeyDown={(event) => {
+                if (event.key !== "Tab") return;
+                const controls = [...event.currentTarget.querySelectorAll("button, a[href]")];
+                const first = controls[0];
+                const last = controls[controls.length - 1];
+                if (event.shiftKey && document.activeElement === first) {
+                    event.preventDefault();
+                    last.focus();
+                } else if (!event.shiftKey && document.activeElement === last) {
+                    event.preventDefault();
+                    first.focus();
+                }
+            }}
         >
-            <button
-                onClick={() => setMenuOpen(false)}
-                className="absolute top-6 right-6 text-[var(--heading)] text-3xl cursor-pointer"
-                aria-label="Close menu"
-            >
-                &times;
-            </button>
-
-            <nav className="flex flex-col items-center gap-8">
-                {LINKS.map(({ id, label }) => (
-                    <button
-                        key={id}
-                        onClick={() => handleNav(id)}
-                        className={`text-3xl font-bold tracking-tight cursor-pointer
-                            transition-all duration-300 bg-transparent border-0
-                            ${menuOpen ? "opacity-100 translate-y-0" : "opacity-0 translate-y-5"}
-                            text-[var(--heading)] hover:text-[var(--accent)]`}
+            <div className="menu-heading">
+                <p className="label-text" id="menu-title">The index</p>
+                <button className="text-button" onClick={onClose} autoFocus>Close</button>
+            </div>
+            <nav aria-label="Mobile navigation">
+                {pages.map((page, index) => (
+                    <a
+                        key={page.id}
+                        href={`#${page.id}`}
+                        aria-current={activePage === page.id ? "page" : undefined}
+                        onClick={(event) => {
+                            event.preventDefault();
+                            navigate(page.id);
+                        }}
                     >
-                        {label}
-                    </button>
+                        <span className="label-text" aria-hidden="true">0{index + 1}</span>
+                        {page.label}
+                    </a>
                 ))}
             </nav>
-
-            <div className="absolute bottom-10 flex gap-8">
-                <a
-                    href="https://instagram.com/asr_hardi/"
-                    target="_blank"
-                    rel="noreferrer"
-                    className="label-text text-[var(--muted)] hover:text-[var(--heading)] transition-colors"
-                >
-                    INSTAGRAM ↗
-                </a>
-                <a
-                    href="https://github.com/asriqul"
-                    target="_blank"
-                    rel="noreferrer"
-                    className="label-text text-[var(--muted)] hover:text-[var(--heading)] transition-colors"
-                >
-                    GITHUB ↗
-                </a>
-            </div>
-        </div>
+            <p className="menu-signature">Ace ft <em>Nemo</em><span>Backend development & web3 research</span></p>
+        </dialog>
     );
 };
