@@ -47,7 +47,7 @@ export const Home = ({ onNavigate }) => {
                 <div className="current-focus">
                     <p className="label-text">Currently working on</p>
                     <p>DeFi automation<br /><span>& security research.</span></p>
-                    <p className="current-focus-note">Self-directed my experimental projects, not tied to a single client or employer.</p>
+                    <p className="current-focus-note">Self-directed experimental projects, not tied to a single client or employer.</p>
                     <button className="text-button" onClick={() => onNavigate("about")}>Read the manifesto</button>
                 </div>
             </div>
