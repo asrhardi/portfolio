@@ -46,8 +46,10 @@ export default function App() {
     }, []);
 
     useEffect(() => {
-        document.title = `${activePage.label} | Ace ft Nemo`;
-    }, [activePage.label]);
+        document.title = activePage.id === "home"
+            ? "AsrHardi | Backend Developer & Web3 Security Research"
+            : `${activePage.label} | AsrHardi (Ace ft Nemo)`;
+    }, [activePage.id, activePage.label]);
 
     const navigate = useCallback((target) => {
         const page = typeof target === "number" ? PAGES[target] : PAGES.find((item) => item.id === target);

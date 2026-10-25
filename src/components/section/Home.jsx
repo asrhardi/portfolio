@@ -15,6 +15,7 @@ export const Home = ({ onNavigate }) => {
                     <p className="role-text">Backend-focused web developer</p>
                     <h1 id="home-title" className="home-title">ACE ft <span>NEMO</span></h1>
                     <p className="home-description">
+                        I'm AsrHardi, also known as Ace ft Nemo.{" "}
                         I build backend services and on-chain automation tools.
                         My current focus is DeFi automation, wallet recovery,
                         and web3 security research.
