@@ -1,0 +1,8 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "container",
+  "env": {
+    "CMS_DEPLOYMENT_TARGET": "vercel",
+    "PORT": "1337"
+  }
+}

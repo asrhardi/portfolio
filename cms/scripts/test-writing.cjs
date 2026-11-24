@@ -18,8 +18,29 @@ async function main() {
     APP_KEYS: `${secret()},${secret()}`, ADMIN_JWT_SECRET: secret(), API_TOKEN_SALT: secret(),
     TRANSFER_TOKEN_SALT: secret(), ENCRYPTION_KEY: secret(), STRAPI_TELEMETRY_DISABLED: 'true',
   });
+  const blobFiles = new Map();
+  const useBlob = process.env.CMS_TEST_BLOB === '1';
+  if (process.env.CMS_TEST_DATABASE_URL) Object.assign(process.env, {
+    DATABASE_CLIENT: 'postgres', DATABASE_URL: process.env.CMS_TEST_DATABASE_URL,
+    DATABASE_SSL: 'false', DATABASE_POOL_MIN: '0', DATABASE_POOL_MAX: '5',
+  });
+  if (useBlob) {
+    Object.assign(process.env, { UPLOAD_PROVIDER: 'vercel-blob', BLOB_PATH_PREFIX: 'strapi/test' });
+    const provider = require('../providers/vercel-blob');
+    provider.init = (options) => provider.createProvider(options, {
+      async put(pathname, body) {
+        const chunks = [];
+        for await (const chunk of body) chunks.push(Buffer.from(chunk));
+        const target = pathname.replace(/\.(\w+)$/, '-test.$1');
+        const url = `https://test-store.public.blob.vercel-storage.com/${target}`;
+        blobFiles.set(url, Buffer.concat(chunks));
+        return { url, pathname: target };
+      },
+      async del(url) { blobFiles.delete(url); },
+    });
+  }
   const { createStrapi } = require('@strapi/strapi');
-  const app = createStrapi({ appDir });
+  let app = createStrapi({ appDir });
   const fixtureFiles = [];
   try {
     await app.load();
@@ -55,8 +76,12 @@ async function main() {
     assert.equal(uploadResponse.status, 201, 'Administrator image upload failed.');
     const [uploaded] = await uploadResponse.json();
     for (const media of [uploaded, ...Object.values(uploaded.formats || {})]) {
-      assert(media.url.startsWith('/uploads/'));
-      fixtureFiles.push(path.join(appDir, 'public', media.url));
+      if (useBlob) {
+        assert(blobFiles.has(media.url), 'Media was not sent through the Blob provider.');
+      } else {
+        assert(media.url.startsWith('/uploads/'));
+        fixtureFiles.push(path.join(appDir, 'public', media.url));
+      }
     }
     console.info('PASS: administrator registration, Article editor configuration, and authenticated image upload verified.');
     const article = await documents.create({ data: {
@@ -105,16 +130,33 @@ async function main() {
     assert(!sitemap.includes(draft.slug));
     assert(sitemap.includes(`/writing/${article.slug}`));
     const copiedImage = JSON.parse(data).data.body.find((block) => block.type === 'image').image.url;
-    assert(copiedImage.startsWith('/writing/media/'));
-    const uploadedBytes = Buffer.from(await (await get(uploaded.url)).arrayBuffer());
-    const copiedBytes = await readFile(path.join(root, 'dist', copiedImage.slice(1)));
-    assert(copiedBytes.equals(uploadedBytes), 'The static copy differs from the CMS-served image.');
+    if (useBlob) {
+      assert.equal(copiedImage, uploaded.url);
+      assert(blobFiles.get(copiedImage)?.length > 0, 'The persistent media URL has no content.');
+    } else {
+      assert(copiedImage.startsWith('/writing/media/'));
+      const uploadedBytes = Buffer.from(await (await get(uploaded.url)).arrayBuffer());
+      const copiedBytes = await readFile(path.join(root, 'dist', copiedImage.slice(1)));
+      assert(copiedBytes.equals(uploadedBytes), 'The static copy differs from the CMS-served image.');
+    }
     console.info('PASS: static article HTML, canonical, sitemap, safe rich text, and copied media verified.');
 
     await documents.unpublish({ documentId: article.documentId });
     assert.deepEqual((await (await get('/api/writing')).json()).data, []);
     assert.equal((await get(`/api/writing/${article.slug}`)).status, 404);
     console.info('PASS: unpublishing removes the article from both public endpoints.');
+    await app.destroy();
+    app = createStrapi({ appDir });
+    await app.load();
+    app.log.level = 'error';
+    await app.start();
+    const restarted = `http://127.0.0.1:${app.server.httpServer.address().port}`;
+    assert.equal((await (await fetch(`${restarted}/admin/init`)).json()).data.hasAdmin, true);
+    assert.equal(await app.documents('api::article.article').count({ status: 'draft' }), 2);
+    const persistedMedia = await app.db.query('plugin::upload.file').findOne({ where: { id: uploaded.id } });
+    assert.equal(persistedMedia.url, uploaded.url);
+    if (useBlob) assert(blobFiles.has(persistedMedia.url));
+    console.info('PASS: administrator, articles, and media references survive a CMS restart.');
   } finally {
     await app.destroy();
     for (const filename of fixtureFiles) await rm(filename, { force: true });

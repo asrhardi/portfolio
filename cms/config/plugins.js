@@ -1,3 +1,5 @@
+const { isVercel } = require('../lib/deployment');
+
 const allowedMediaTypes = [
   'image/jpeg',
   'image/png',
@@ -18,10 +20,14 @@ const deniedTypes = [
   'application/x-mach-binary',
 ];
 
-module.exports = () => ({
+module.exports = ({ env }) => ({
   upload: {
     config: {
-      sizeLimit: 10 * 1024 * 1024,
+      sizeLimit: (isVercel() ? 4 : 10) * 1024 * 1024,
+      ...(env('UPLOAD_PROVIDER', isVercel() ? 'vercel-blob' : 'local') === 'vercel-blob' ? {
+        provider: 'strapi-provider-upload-vercel-blob',
+        providerOptions: { prefix: env('BLOB_PATH_PREFIX', `strapi/${env('VERCEL_ENV', 'production')}`) },
+      } : {}),
       security: {
         allowedTypes: allowedMediaTypes,
         deniedTypes,

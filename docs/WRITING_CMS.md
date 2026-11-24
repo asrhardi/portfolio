@@ -139,12 +139,97 @@ Back up the PostgreSQL database, the uploads volume, and the private environment
 
 Before upgrades, take a backup and test it on a separate database. Strapi dependencies are pinned in `cms/package-lock.json`. Normal `docker compose down` preserves named volumes; `down --volumes` deletes them and must not be used for ordinary redeployments.
 
+## Deploy the CMS to Vercel with Neon and Blob
+
+The frontend and CMS are two Vercel projects. The frontend retains repository root `.` and its existing build command. The CMS uses Root Directory `cms`, the **Container** preset, and its own `cms/vercel.json`. Keep the CMS Build/Output overrides at their container defaults; do not use the frontend's `dist` output directory here.
+
+The CMS image starts an HTTP server on port 1337, matching the project configuration. `CMS_DEPLOYMENT_TARGET=vercel` enables startup validation, PostgreSQL defaults with TLS verification, an idle-free pool (minimum 0, maximum 5), trusted HTTPS proxy headers, and the Blob provider. Missing configuration fails with variable names and guidance, without printing secret values. SQLite and local uploads are rejected in this deployment mode. The same source continues to support local Docker/SQLite and VPS/PostgreSQL.
+
+### 1. Generate private CMS configuration
+
+From the repository root:
+
+```sh
+npm --prefix cms ci
+npm run cms:vercel:setup -- --public-url https://cms-eight-puce-83.vercel.app
+```
+
+This creates `cms/.env.vercel` with mode 600. It is gitignored and excluded from Docker build context. The example `cms/.env.vercel.example` is safe to commit. The generated environment has separate random Strapi secrets; rerunning setup preserves the file and keys. Keep a private backup. This is a new deployment configuration, not an automatic migration of the local administrator account or encrypted database contents.
+
+### 2. Connect a dedicated Neon database
+
+Create a Neon PostgreSQL resource through Vercel Marketplace and connect it to the **CMS project, Production environment**. Use a new dedicated database for this Strapi application, not a database with another application's tables. Set `DATABASE_URL` to its PostgreSQL connection string. Prefer a pooled connection with a valid TLS configuration; keep certificate verification enabled. The application uses the regular `pg` driver, not Neon's HTTP driver.
+
+The file contains these defaults:
+
+```text
+DATABASE_CLIENT=postgres
+DATABASE_SSL=true
+DATABASE_SSL_REJECT_UNAUTHORIZED=true
+DATABASE_POOL_MIN=0
+DATABASE_POOL_MAX=5
+```
+
+Copy the integration's actual connection string into the private file if you want to check it locally. Do not overwrite an automatically-injected connection string with the empty example value.
+
+### 3. Connect a public Vercel Blob store
+
+Create a **public** Blob store and connect it to the **CMS project's Production environment**. The integration supplies `BLOB_STORE_ID`; Vercel supplies and rotates `VERCEL_OIDC_TOKEN`. The provider lets `@vercel/blob` read these automatically, including token refresh. Do not manually copy an OIDC token into the environment file or pass it as a static SDK credential.
+
+When running outside Vercel, an optional `BLOB_READ_WRITE_TOKEN` can authenticate instead. Keep it server-side. `UPLOAD_PROVIDER=vercel-blob` selects the included provider, and `BLOB_PATH_PREFIX=strapi/production` places CMS images in a dedicated prefix. Thumbnails and optimized formats use the same provider. Blob object names have random suffixes; replacing a media file uploads the new object before deleting the previous object. Credentials are never stored in Media Library metadata or public Writing responses.
+
+All media in this store is public, including files attached to draft articles. Vercel mode limits each image and the total multipart file content per request to **4 MiB**, leaving space for multipart overhead under the default Function payload cap. Upload small batches or one image at a time. The local Docker setup retains its 10 MiB image limit. Larger upload flows would require a separate direct-upload implementation.
+
+### 4. Configure the CMS project and deploy
+
+In the CMS project's Production environment, add the generated secret values from `cms/.env.vercel`:
+
+```text
+APP_KEYS
+ADMIN_JWT_SECRET
+API_TOKEN_SALT
+TRANSFER_TOKEN_SALT
+ENCRYPTION_KEY
+```
+
+Also add `PUBLIC_URL=https://cms-eight-puce-83.vercel.app`, `DATABASE_URL`, `DATABASE_CLIENT=postgres`, `UPLOAD_PROVIDER=vercel-blob`, and `TRUST_PROXY=true`, plus the Blob connection. Import only filled values from the private environment file. `cms/vercel.json` supplies the deployment target and `PORT=1337` automatically.
+
+After filling the private file with the database URL and Blob store id, run:
+
+```sh
+npm run cms:vercel:check
+```
+
+This checks values and requirements without opening a database connection or uploading anything. It accepts a store id without an OIDC token because Vercel injects that token at runtime. The actual startup check requires both, or a read-write token. Missing resources must be filled before this check can pass.
+
+Commit/push the source changes, then deploy the CMS project. No database, store, credentials, Vercel settings, or production deployments are created by the setup command. On a fresh database, complete first-administrator registration through a private/protected HTTPS deployment before opening public access. Use the same secrets across future deployments.
+
+Use separate databases and Blob stores/prefixes for Preview and Production; do not point automatic Preview deployments at the production database. Configure each environment explicitly. A preview URL alone does not isolate its data.
+
+### 5. Verify before switching the portfolio
+
+1. Check CMS runtime logs for a successful startup and open `/admin` over HTTPS.
+2. Register or sign in, upload a small image, and publish a test article. Confirm the image URL points to the public Blob domain.
+3. Confirm `/api/writing` and `/api/writing/<slug>` return only published content.
+4. Redeploy the CMS and let a container instance stop/start. Confirm administrator access, article data, and images persist. Test a cold request after the service has been idle.
+5. Build the frontend with `CMS_URL=https://cms-eight-puce-83.vercel.app` and inspect the actual article page and image. Set that value on the **portfolio project's** Production environment only after the new CMS is verified.
+6. Recreate the portfolio Deploy Hook webhook on the new CMS, selecting Article Publish, Unpublish, and Delete. Verify deployment reaches Ready and publication/unpublication changes the site.
+
+The existing local database, administrator, images, and webhook configuration are not automatically copied into Neon/Blob. Take a backup and use Strapi's supported export/import or transfer workflow on a separate target, checking its overwrite prompts and supported data types. Administrator accounts and API credentials need separate setup; verify content counts, draft/published states, media URLs, links, secrets, and webhooks before switching. Keep the local instance as the source until the target has been verified. Repository data is never used as a database migration.
+
+Vercel Container Runtime can scale idle instances down. Strapi has startup work and schema checks, so a successful Docker build alone does not verify cold-start behavior, simultaneous instances, database pooling, or cloud media access. These checks must run with the actual Neon and Blob resources before replacing the local CMS. Source adaptation and local tests do not certify production cloud operation.
+
+Local verification for this adaptation included the container build, startup on a read-only application filesystem with temporary `/tmp`, a PostgreSQL TLS connection with certificate verification, secure administrator cookies behind forwarded HTTPS, and administrator persistence after a container restart. The integration suite also exercised PostgreSQL article publication/unpublication, image metadata, and restart persistence with an in-memory substitute for Blob calls. Real Neon connectivity, Blob authentication/upload, and an actual Vercel cold start remain unverified until those resources are connected.
+
+References: [Vercel Container Runtime](https://vercel.com/docs/functions/runtimes/container), [Vercel Blob SDK and OIDC](https://vercel.com/docs/vercel-blob/using-blob-sdk), [Vercel Function payload limits](https://vercel.com/docs/functions/limitations), [Strapi media providers](https://docs.strapi.io/cms/configurations/media-library-providers), and [Strapi data management](https://docs.strapi.io/cms/features/data-management).
+
 ## Checks
 
 From the repository root:
 
 ```sh
 npm test
+npm run cms:test
 npm run lint
 npm run test:cms
 npm run cms:build

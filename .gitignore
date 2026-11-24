@@ -30,6 +30,7 @@ dist-ssr
 .env.*
 !.env.example
 !cms/.env.example
+!cms/.env.vercel.example
 cms/.cache/
 cms/.tmp/
 cms/.strapi/

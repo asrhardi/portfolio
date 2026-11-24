@@ -19,3 +19,16 @@ The separate `compose.yaml` provides PostgreSQL for a fresh VPS deployment. It d
 The only anonymous content endpoints are `GET /api/writing` and `GET /api/writing/:slug`. They always return published articles, ignoring client-supplied publication filters. Article writes and media uploads require the administrator interface.
 
 See [the Writing operations guide](../docs/WRITING_CMS.md) for publishing, Vercel builds, Docker hosting, backups, and tests.
+
+## Vercel Container deployment
+
+Import a separate Vercel project with Root Directory `cms` and the Container preset. `cms/vercel.json` selects the container and port 1337; the Docker image starts with a configuration check. Vercel uses PostgreSQL and the included Blob upload provider instead of local files.
+
+```sh
+npm run cms:vercel:setup -- --public-url https://cms-eight-puce-83.vercel.app
+npm run cms:vercel:check
+```
+
+Setup creates private `cms/.env.vercel` with generated application secrets. Create a dedicated Neon database and a public Vercel Blob store, connect them to the CMS project's Production environment, then fill/import the remaining settings from that file. Blob uses Vercel-managed OIDC with `BLOB_STORE_ID`; an optional `BLOB_READ_WRITE_TOKEN` supports running outside Vercel. Never commit `.env.vercel` or copy credentials into the frontend project.
+
+Article images are public. Upload at most 4 MiB in total per request in Vercel mode. Existing local articles, administrators, uploaded images, and webhooks are not migrated automatically. Keep the current CMS running until the new instance has been tested with its real database and Blob store. The full operations guide covers setup, migration, and verification.
