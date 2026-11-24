@@ -16,6 +16,7 @@ dist-ssr
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
+.claude/settings.local.json
 .idea
 .DS_Store
 *.suo
@@ -24,4 +25,13 @@ dist-ssr
 *.sln
 *.sw?
 *.md
+!docs/WRITING_CMS.md
+!cms/README.md
+.env.*
+!.env.example
+!cms/.env.example
+cms/.cache/
+cms/.tmp/
+cms/.strapi/
+cms/.backups/
 color-guide.txt

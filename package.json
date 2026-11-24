@@ -5,9 +5,20 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite build && node scripts/build-writing.mjs",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "node --test tests/*.test.mjs",
+    "test:cms": "npm --prefix cms run test:writing",
+    "cms:setup": "npm --prefix cms run setup",
+    "cms:docker:setup": "node cms/scripts/setup-docker-env.cjs",
+    "cms:up": "npm --prefix cms run docker:up",
+    "cms:down": "npm --prefix cms run docker:down",
+    "cms:logs": "npm --prefix cms run docker:logs",
+    "cms:status": "npm --prefix cms run docker:status",
+    "cms:dev": "npm --prefix cms run setup && npm --prefix cms run develop -- --no-watch-admin",
+    "cms:build": "npm --prefix cms run build",
+    "cms:start": "npm --prefix cms run start"
   },
   "dependencies": {
     "@emailjs/browser": "^4.4.1",

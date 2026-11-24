@@ -1,0 +1,16 @@
+services:
+  cms:
+    image: portfolio-cms:local
+    build:
+      context: .
+      args:
+        PUBLIC_URL: ${PUBLIC_URL:?Set PUBLIC_URL in the CMS environment file}
+    environment:
+      NODE_ENV: production
+      HOST: 0.0.0.0
+      PUBLIC_URL: ${PUBLIC_URL:?Set PUBLIC_URL in the CMS environment file}
+    ports:
+      - "127.0.0.1:${CMS_PORT:-1337}:1337"
+    init: true
+    restart: unless-stopped
+    stop_grace_period: 30s

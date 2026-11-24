@@ -1,0 +1,41 @@
+{
+  "name": "cms",
+  "version": "0.1.0",
+  "private": true,
+  "description": "A Strapi application",
+  "scripts": {
+    "setup": "node scripts/setup-env.cjs",
+    "docker:setup": "node scripts/setup-docker-env.cjs",
+    "docker:up": "npm run docker:setup && docker compose --env-file .env.docker -f compose.local.yaml -p portfolio-cms up --build -d",
+    "docker:down": "docker compose --env-file .env.docker -f compose.local.yaml -p portfolio-cms down",
+    "docker:logs": "docker compose --env-file .env.docker -f compose.local.yaml -p portfolio-cms logs -f --tail=100 cms",
+    "docker:status": "docker compose --env-file .env.docker -f compose.local.yaml -p portfolio-cms ps",
+    "build": "strapi build",
+    "console": "strapi console",
+    "dev": "strapi develop",
+    "develop": "strapi develop",
+    "start": "strapi start",
+    "test:writing": "node scripts/test-writing.cjs",
+    "strapi": "strapi",
+    "upgrade": "npx @strapi/upgrade latest",
+    "upgrade:dry": "npx @strapi/upgrade latest --dry"
+  },
+  "dependencies": {
+    "@strapi/database": "5.63.0",
+    "@strapi/strapi": "5.63.0",
+    "better-sqlite3": "12.11.1",
+    "pg": "^8.23.1",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "react-router-dom": "^6.30.3",
+    "styled-components": "^6.0.0"
+  },
+  "engines": {
+    "node": ">=22.0.0 <=26.x.x",
+    "npm": ">=6.0.0"
+  },
+  "strapi": {
+    "uuid": "ded2f6fb-f176-4397-a305-f8e46b2a9342",
+    "installId": "fa71b0f5beabe4cd376bb5088f7e4fb8da5888c72162847e3e3511f9d19f1567"
+  }
+}

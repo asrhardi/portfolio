@@ -1,0 +1,21 @@
+services:
+  cms:
+    extends:
+      file: compose.service.yaml
+      service: cms
+    env_file:
+      - .env.docker
+    environment:
+      DATABASE_CLIENT: sqlite
+      DATABASE_FILENAME: .tmp/data.db
+    volumes:
+      - type: bind
+        source: ./.tmp
+        target: /opt/app/.tmp
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ./public/uploads
+        target: /opt/app/public/uploads
+        bind:
+          create_host_path: false

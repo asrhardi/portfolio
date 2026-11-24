@@ -1,0 +1,31 @@
+services:
+  cms:
+    extends:
+      file: compose.service.yaml
+      service: cms
+    env_file: .env.production
+    environment:
+      DATABASE_CLIENT: postgres
+      DATABASE_HOST: database
+    volumes:
+      - uploads:/opt/app/public/uploads
+    depends_on:
+      database:
+        condition: service_healthy
+  database:
+    image: postgres:17-bookworm
+    environment:
+      POSTGRES_DB: ${DATABASE_NAME:?Set DATABASE_NAME}
+      POSTGRES_USER: ${DATABASE_USERNAME:?Set DATABASE_USERNAME}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD:?Set DATABASE_PASSWORD}
+    volumes:
+      - database:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+volumes:
+  uploads:
+  database:

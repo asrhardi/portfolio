@@ -51,7 +51,7 @@ export const MobileMenu = ({ pages, activePage, menuOpen, onClose, triggerRef, n
                 {pages.map((page, index) => (
                     <a
                         key={page.id}
-                        href={`#${page.id}`}
+                        href={page.href}
                         aria-current={activePage === page.id ? "page" : undefined}
                         onClick={(event) => {
                             event.preventDefault();

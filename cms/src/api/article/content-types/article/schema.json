@@ -1,0 +1,31 @@
+{
+  "kind": "collectionType",
+  "collectionName": "articles",
+  "info": {
+    "singularName": "article",
+    "pluralName": "articles",
+    "displayName": "Article",
+    "description": "Writing published on AsrHardi's portfolio"
+  },
+  "options": { "draftAndPublish": true },
+  "attributes": {
+    "title": { "type": "string", "required": true, "maxLength": 160 },
+    "slug": {
+      "type": "uid",
+      "targetField": "title",
+      "required": true,
+      "maxLength": 120,
+      "regex": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+    },
+    "excerpt": { "type": "text", "required": true, "maxLength": 320 },
+    "body": { "type": "blocks", "required": true },
+    "cover": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": ["images"]
+    },
+    "date": { "type": "date" },
+    "seoTitle": { "type": "string", "maxLength": 160 },
+    "seoDescription": { "type": "text", "maxLength": 320 }
+  }
+}
